@@ -1,8 +1,12 @@
 defmodule DistributedKv.Bucket do
   use GenServer
 
-  def start_link do
-    GenServer.start_link(__MODULE__, nil)
+  def start(opts \\ []) do
+    GenServer.start(__MODULE__, nil, opts)
+  end
+
+  def start_link(opts \\ []) do
+    GenServer.start_link(__MODULE__, nil, opts)
   end
 
   def init(_) do
