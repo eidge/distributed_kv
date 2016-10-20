@@ -16,7 +16,7 @@ defmodule DistributedKv.BucketSupervisor do
   end
 
   def find_or_start_bucket!(name) do
-    case bucket = Process.whereis(name) do
+    case bucket = find(name) do
       nil ->
         {:ok, bucket} = start_bucket(name)
         bucket
@@ -27,9 +27,18 @@ defmodule DistributedKv.BucketSupervisor do
 
   def start_bucket(name) do
     case Supervisor.start_child(__MODULE__, [[name: name]]) do
-      {:ok, pid} -> {:ok, pid}
+      {:ok, pid} ->
+        :yes = :global.register_name(name, pid)
+        {:ok, pid}
       {:error, {:already_started, pid}} -> {:ok, pid}
       error -> error
+    end
+  end
+
+  defp find(name) do
+    case :global.whereis_name(name) do
+      :undefined -> nil
+      pid -> pid
     end
   end
 end
